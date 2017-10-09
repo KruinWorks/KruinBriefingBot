@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "KruinBriefingBot", "KruinBriefingBot\KruinBriefingBot.vbproj", "{5B09B394-80D3-463D-AF07-87A5C1D0804E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B09B394-80D3-463D-AF07-87A5C1D0804E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B09B394-80D3-463D-AF07-87A5C1D0804E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B09B394-80D3-463D-AF07-87A5C1D0804E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B09B394-80D3-463D-AF07-87A5C1D0804E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45B40910-99AF-40D2-85B7-C831403B92AF}
+	EndGlobalSection
+EndGlobal
