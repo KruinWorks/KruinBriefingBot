@@ -3,6 +3,34 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <ApplicationManifest>\My Project\app.manifest</ApplicationManifest>
+    <StartupObject>Sub Main</StartupObject>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>1.0.0-demo-b1</Version>
+    <Authors>Elepover</Authors>
+    <Company>KruinWorks</Company>
+    <Description>KruinBriefing - Your favorite Telegram Channels, distributed altogether in one place.</Description>
+    <Copyright>Copyright (C) 2017 Elepover.</Copyright>
+    <PackageLicenseUrl>https://github.com/remy/mit-license</PackageLicenseUrl>
+    <PackageProjectUrl />
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Telegram.Bot" Version="13.2.1" />
+  </ItemGroup>
 
 </Project>

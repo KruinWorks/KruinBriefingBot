@@ -1,0 +1,119 @@
+# File Tree
+
+/
+	[Binary] KruinBriefing
+	[Dir] KruinBriefing
+		[Dir] channels
+			UID.json*
+			...
+		[Dir] subscriptions
+			SID.json*
+			...
+		[Dir] logs
+			yyyy-mm-dd-hh_mm_ss.log
+			...
+			CRITICAL.log
+			WARN.log
+		[File] stats.json
+		[File] config.json
+
+*: Not Telegram ID.
+
+# File Formats
+
+UID.json
+{
+	"chatID": 0,
+	"paused": false
+}
+
+SID.json
+{
+	"chatID": 0,
+	"subscriptions": "<UID>,<UID>,<UID>,..."
+}
+
+stats.json
+{
+	"messagesSent": 0,
+	"errorsOccurred": 0,
+	"totalReceivedViaChannels": 0,
+	"totalReceivedUserCommands": 0,
+	"messagesForwarded": 0
+}
+
+config.json
+{
+	"debug": false,
+	"currentUID": 0,
+	"currentSID": 0
+}
+
+
+# Commands
+
+Users:
+/subscribe <UID/ALL>		Subscribe to a channel.
+/unsubscribe <UID/ALL>		Unsubscribe to a channel.
+/listsubs					List of subscribed channels.
+/pause <UID>				Pause/Unpause message forwarding from a channel.
+/help [A]					Get command usage helps.
+
+Administrators:
+/listchannels				List of available channels for subscription.
+/getchatid					Get current session's Telegram Chat ID.
+/requestjoin				Request to join the KruinBriefing.
+/requestleave <UID>			Request to leave KruinBriefing.
+/status						Bot status.
+/stats						Show bot statistics.
+
+
+# Permission Details and Chat Formarts
+
+Command			Requirements				Publicly Visible	Error Message				OK Message
+/subscribe		[1] Specified channel has	Yes					Error: You've already		Successfully subscribed to channel #<UID>!
+					joined the 									subscribed to this channel.
+					KruinBriefing.
+				[2] The user has not							Error: Channel not found.
+					subscribed to specified						Error: Unknown error.
+					channel yet.
+				[3] For "ALL" option. The
+					user should have
+					subscribed at least 1
+					channel.
+/unsubscribe	[1] The user has subscribed	Yes					Error: You've not			Successfully unsubscribed!
+					to specified channel.						subscribed to this channel
+																yet.
+																Error: Unknown error.
+/listsubs									Yes					Error: Unknown error.		Your current subscriptions:
+																							(No active subscription.)
+																							[P] <UID>: <Title>
+																							[F] <UID>: <Title>
+/pause			[1] The user has subscribed Yes					Error: You've not			Succeed!
+					to specified channel.						subscribed to this channel	[i] Call /listsubs command here.
+																yet.
+																Error: Unknown error.
+/help			[1] "A" option requires		Yes					Error: You're not permitted	KruinBriefing Commands Help:
+					administrative								to do this.					...
+					privilege.									Error: Unknown error.
+/listchannels	[1] Requires administrative	No					Error: You're not permitted	Channels available in KruinBriefing:
+					privilege.									to do this.					<UID>: <Title>
+																Error: Unknown error.
+/getchatid		[1] Requires administrative	No					Error: You're not permitted	Current session: <CHATID>
+					privilege.									to do this.
+																Error: Unknown error.
+/requestjoin	[1] Channel has not joined	No					Error: The channel has		Please forward me a message from
+					KruinBriefing yet.							already joined				the channel.
+																KruinBriefing.				Succeed! Your request has been sent
+																Error: Unknown error.		to the supervisors.
+/requestleave	[1] Channel has joined		No					Error: The channel has		Succeed! Your request has been sent
+					KruinBriefing.								not joined KruinBriefing	to the supervisors.
+																yet.
+																Error: Unknown error.
+/status			[1] Requires administrative	No					Error: You're not permitted	Bot status:
+					privilege.									to do this.					System memory:
+																Error: Unknown error.		System storage:
+																							...
+/stats			[1] Requires administrative	No					Error: You're not permitted	Bot statistics:
+																to do this.					...
+																Error: Unknown error.
