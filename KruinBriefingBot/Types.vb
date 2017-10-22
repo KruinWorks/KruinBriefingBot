@@ -7,16 +7,6 @@ Public NotInheritable Class Types
     ''' </summary>
     Public Class MemberChannelModel
         ''' <summary>
-        ''' Initialize a MemberChannelModel object.
-        ''' </summary>
-        ''' <param name="Channel">Required. The member channel's Chat object.</param>
-        Sub New(Channel As Telegram.Bot.Types.Chat)
-            If Not Channel.Type = Telegram.Bot.Types.Enums.ChatType.Channel Then
-                Throw New System.InvalidOperationException("Specified chat is not a channel.")
-            End If
-            TelegramID = Channel.Id
-        End Sub
-        ''' <summary>
         ''' Indicates whether the channel owner has paused message forwarding or not.
         ''' </summary>
         ''' <returns></returns>
@@ -41,15 +31,6 @@ Public NotInheritable Class Types
     ''' Model of KruinBriefing subscriptions.
     ''' </summary>
     Public Class SubscriptionModel
-        ''' <summary>
-        ''' Initialize a SubscriptionModel.
-        ''' 
-        ''' Attention: The SubscribedChannels object will be null after initalization.
-        ''' </summary>
-        ''' <param name="chat">Required. The subscription [(Super)Group / Private Chat]'s Chat object.</param>
-        Sub New(chat As Telegram.Bot.Types.Chat)
-            ChatId = chat.Id
-        End Sub
         ''' <summary>
         ''' The Telegram Chat ID of the subscription.
         ''' </summary>
