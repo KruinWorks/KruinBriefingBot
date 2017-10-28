@@ -6,15 +6,15 @@
     <ApplicationManifest>\My Project\app.manifest</ApplicationManifest>
     <StartupObject>Sub Main</StartupObject>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-demo-b1</Version>
+    <Version>1.0.2-rs-b12</Version>
     <Authors>Elepover</Authors>
     <Company>KruinWorks</Company>
     <Description>KruinBriefing - Your favorite Telegram Channels, distributed altogether in one place.</Description>
     <Copyright>Copyright (C) 2017 Elepover.</Copyright>
     <PackageLicenseUrl>https://github.com/remy/mit-license</PackageLicenseUrl>
     <PackageProjectUrl />
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <AssemblyVersion>1.0.2.12</AssemblyVersion>
+    <FileVersion>1.0.2.12</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

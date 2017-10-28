@@ -52,4 +52,21 @@ Public NotInheritable Class Types
         ''' <returns></returns>
         Public Property SubscribedChannels As List(Of MemberChannelModel)
     End Class
+    ''' <summary>
+    ''' Indicates how serious this log entry is.
+    ''' </summary>
+    Public Enum LogEventLevel
+        ''' <summary>
+        ''' Everything goes well.
+        ''' </summary>
+        Info = 0
+        ''' <summary>
+        ''' Something wrong may happen.
+        ''' </summary>
+        Warning = 1
+        ''' <summary>
+        ''' Something REALLY wrong happened.
+        ''' </summary>
+        Exception = 2
+    End Enum
 End Class

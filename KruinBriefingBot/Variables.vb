@@ -10,6 +10,7 @@ Public NotInheritable Class Variables
     Public Shared ReadOnly Property AppConfDir_Logs As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "logs")
     Public Shared ReadOnly Property AppConfFile_Stats As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "stats.json")
     Public Shared ReadOnly Property AppConfFile_Conf As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "config.json")
+    Public Shared ReadOnly Property AppVersion As String = "1.0.2-rs-b12"
 
     Public NotInheritable Class Templates
         Public Shared ReadOnly Property ConfigTemplate As String = "{
@@ -46,15 +47,15 @@ Public NotInheritable Class Variables
 
     Public Shared Sub TimeWorker_Run()
         'Entrance
-        Console.WriteLine("[TW] Starting...")
-        Console.WriteLine("[TW] Entering loop...")
+        Logging.WriteBoth("[TW] Starting...")
+        Logging.WriteConsole("[TW] Entering loop...")
         Do Until 233 = 2333
-            Console.WriteLine("[TW] Saving statistics...")
+            Logging.WriteConsole("[TW] Saving statistics...")
             Try
                 Methods.SaveStatsOnly()
-                Console.WriteLine("[TW] Statistics saved.")
+                Logging.WriteBoth("[TW] Statistics saved.")
             Catch ex As Exception
-                Console.WriteLine("[TW] Boom: " & ex.ToString)
+                Logging.WriteBoth("[TW] Boom: " & ex.ToString, Types.LogEventLevel.Exception)
                 Variables.currentStatistics.ErrorsOccurred += 1
             End Try
             Threading.Thread.Sleep(currentSettings.TWInterval)
@@ -62,28 +63,28 @@ Public NotInheritable Class Variables
     End Sub
 
     Public Shared Async Sub BotInstance_OnUpdate(sender As Object, e As UpdateEventArgs) Handles BotInstance.OnUpdate
-        LogWriter.WriteLine("Type: " & e.Update.Type.ToString)
+        Logging.WriteLog("Type: " & e.Update.Type.ToString)
         If e.Update.Type = Telegram.Bot.Types.Enums.UpdateType.ChannelPost Then
-            Console.WriteLine("[C] Update: via " & e.Update.ChannelPost.Chat.Id)
-            LogWriter.WriteLine("Broadcast: " & e.Update.ChannelPost.Text & " / Chat: " & e.Update.ChannelPost.Chat.Id)
+            Logging.WriteBoth("[C] Update: via " & e.Update.ChannelPost.Chat.Id)
+            Logging.WriteLog("Broadcast: " & e.Update.ChannelPost.Text)
             Variables.currentStatistics.TotalReceivedViaChannels += 1
             If Await Methods.CheckIfInSubs(e.Update.ChannelPost.Chat.Id) Then
                 Dim mainChannel As Telegram.Bot.Types.Chat = Await BotInstance.GetChatAsync(New Telegram.Bot.Types.ChatId(currentSettings.ChannelID))
-                LogWriter.WriteLine("Forwarding...")
+                Logging.WriteBoth("Forwarding...")
                 Try
                     Await BotInstance.ForwardMessageAsync(mainChannel.Id, e.Update.ChannelPost.Chat.Id, e.Update.ChannelPost.MessageId)
                 Catch ex As Exception
-                    Console.WriteLine("E: " & ex.ToString)
+                    Logging.WriteBoth(ex.ToString, Types.LogEventLevel.Exception)
                     Variables.currentStatistics.ErrorsOccurred += 1
                     Exit Sub
                 End Try
                 Variables.currentStatistics.MessageSent += 1
                 Variables.currentStatistics.MessagesForwarded += 1
-                LogWriter.WriteLine("Succeeded.")
+                Logging.WriteBoth("Succeeded.")
             End If
         ElseIf e.Update.Type = Telegram.Bot.Types.Enums.UpdateType.MessageUpdate Then
-            Console.WriteLine("[P] Update: via " & e.Update.Message.Chat.Id)
-            LogWriter.WriteLine("PMsg: " & e.Update.Message.Text & " / Chat: " & e.Update.Message.Chat.Id)
+            Logging.WriteBoth("[P] Update: via " & e.Update.Message.Chat.Id)
+            Logging.WriteLog("PMsg: " & e.Update.Message.Text)
             Variables.currentStatistics.TotalReceivedUserCommands += 1
             If e.Update.Message.Text.ToLower().IndexOf("/") = 0 Then
                 If e.Update.Message.Text.ToLower.IndexOf("listsubs") = 1 Then
@@ -99,15 +100,15 @@ Public NotInheritable Class Variables
                     Next
                     Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, text)
                     Variables.currentStatistics.MessageSent += 1
-                    LogWriter.WriteLine("Reply sent.")
+                    Logging.WriteBoth("[P] Reply sent.")
                 ElseIf e.Update.Message.Text.ToLower.IndexOf("help") = 1 Then
                     Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, "Check out the available commands.")
                     Variables.currentStatistics.MessageSent += 1
-                    LogWriter.WriteLine("Reply sent.")
+                    Logging.WriteBoth("[P] Reply sent.")
                 ElseIf e.Update.Message.Text.ToLower.IndexOf("start") = 1 Then
                     Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, "Welcome to KruinBriefing! Check out the available commands, or goto @KruinBriefing .")
                     Variables.currentStatistics.MessageSent += 1
-                    LogWriter.WriteLine("Reply sent.")
+                    Logging.WriteBoth("[P] Reply sent.")
                 ElseIf e.Update.Message.Text.ToLower.IndexOf("status") = 1 Then
                     If e.Update.Message.Chat.Id = Variables.currentSettings.SupervisorID Then
                         Try
@@ -121,19 +122,46 @@ Public NotInheritable Class Variables
                             status &= "Remote Time(UTC): " & Date.UtcNow.ToString() & vbCrLf
                             Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, status)
                             Variables.currentStatistics.MessageSent += 1
-                            LogWriter.WriteLine("Reply sent.")
+                            Logging.WriteBoth("[P] Reply sent.")
                         Catch ex As Exception
 #Disable Warning
                             BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, Templates.ErrMsg.BotException)
 #Enable Warning
                             Variables.currentStatistics.ErrorsOccurred += 1
                             Variables.currentStatistics.MessageSent += 1
-                            LogWriter.WriteLine("E: " & ex.ToString)
+                            Logging.WriteLog(ex.ToString, Types.LogEventLevel.Exception)
+                            Logging.WriteConsole(ex.ToString, Types.LogEventLevel.Exception)
                         End Try
                     Else
                         Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, Templates.ErrMsg.PermissionDenied)
                         Variables.currentStatistics.MessageSent += 1
-                        LogWriter.WriteLine("Denial reply sent.")
+                        Logging.WriteBoth("[P] Denial reply sent.", Types.LogEventLevel.Warning)
+                    End If
+                ElseIf e.Update.Message.Text.ToLower.IndexOf("stats") = 1 Then
+                    If e.Update.Message.Chat.Id = Variables.currentSettings.SupervisorID Then
+                        Try
+                            Dim stats As String = ""
+                            stats &= "As of " & Date.UtcNow.ToString & " (UTC): " & vbCrLf
+                            stats &= "Messages sent: " & Variables.currentStatistics.MessageSent & vbCrLf
+                            stats &= "Errors occurred: " & Variables.currentStatistics.ErrorsOccurred & vbCrLf
+                            stats &= "Total received channel posts: " & Variables.currentStatistics.TotalReceivedViaChannels & vbCrLf
+                            stats &= "Total forwarded channel posts: " & Variables.currentStatistics.MessagesForwarded & vbCrLf
+                            stats &= "Total received user commands: " & Variables.currentStatistics.TotalReceivedUserCommands & vbCrLf
+                            Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, stats)
+                            Variables.currentStatistics.MessageSent += 1
+                            Logging.WriteBoth("[P] Reply sent.")
+                        Catch ex As Exception
+#Disable Warning
+                            BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, Templates.ErrMsg.BotException)
+#Enable Warning
+                            Variables.currentStatistics.ErrorsOccurred += 1
+                            Variables.currentStatistics.MessageSent += 1
+                            Logging.WriteBoth(ex.ToString, Types.LogEventLevel.Exception)
+                        End Try
+                    Else
+                        Await BotInstance.SendTextMessageAsync(e.Update.Message.Chat.Id, Templates.ErrMsg.PermissionDenied)
+                        Variables.currentStatistics.MessageSent += 1
+                        Logging.WriteBoth("[P] Denial reply sent.", Types.LogEventLevel.Warning)
                     End If
                 End If
             End If
@@ -142,7 +170,7 @@ Public NotInheritable Class Variables
 
 
     Public Shared Sub BotInstance_OnReceiveError(sender As Object, e As ReceiveErrorEventArgs) Handles BotInstance.OnReceiveError
-        Console.WriteLine("E: " & e.ApiRequestException.ToString())
+        Logging.WriteBoth(e.ApiRequestException.ToString(), Types.LogEventLevel.Exception)
         Variables.currentStatistics.ErrorsOccurred += 1
     End Sub
 End Class

@@ -10,55 +10,61 @@ Module Program
     ''' <param name="args">Arguments passed to application.</param>
     Sub Main(args As String())
         AddHandler System.Runtime.Loader.AssemblyLoadContext.Default.Unloading, AddressOf OnApplicationExit
-        Console.WriteLine("==> Starting KruinBriefingBot")
+        Logging.WriteConsole("==> Starting KruinBriefingBot")
+        Logging.WriteConsole("==> Current version: " & Variables.AppVersion)
         Dim startupTimer As New Stopwatch
         startupTimer.Start()
-        Console.WriteLine("==> Initializing configuration...")
+        Logging.WriteConsole("==> Initializing configuration...")
         Try
             Methods.Initialize()
             Variables.LogWriter = New IO.StreamWriter(IO.File.Create(IO.Path.Combine(Variables.AppPath, "latest.log")), System.Text.Encoding.UTF8) With {.AutoFlush = True}
         Catch ex As Exception
-            Console.WriteLine("! Error cought while initializing: " & ex.ToString())
+            Logging.WriteConsole("! Error cought while initializing: " & ex.ToString(), Types.LogEventLevel.Exception)
+            Console.ReadLine()
             Environment.Exit(1)
         End Try
-        Console.WriteLine("==> Testing API...")
+        Logging.WriteConsole("==> Testing API...")
         Try
             Variables.BotInstance = New Telegram.Bot.TelegramBotClient(Variables.currentSettings.APIKey)
             Variables.BotInstance.TestApiAsync()
         Catch ex As Exception
-            Console.WriteLine("! Error cought while testing API: " & ex.ToString())
-            Console.WriteLine("! Please check your API key and try again.")
+            Logging.WriteConsole("! Error cought while testing API: " & ex.ToString(), Types.LogEventLevel.Exception)
+            Logging.WriteConsole("! Please check your API key and try again.", Types.LogEventLevel.Exception)
+            Console.ReadLine()
             Environment.Exit(1)
         End Try
-        Console.WriteLine("==> Starting message pump...")
+        Logging.WriteConsole("==> Starting message pump...")
         Try
             Variables.BotInstance.StartReceiving({Telegram.Bot.Types.Enums.UpdateType.ChannelPost, Telegram.Bot.Types.Enums.UpdateType.MessageUpdate})
         Catch ex As Exception
-            Console.WriteLine("! Error cought while starting message pump: " & ex.ToString())
+            Logging.WriteConsole("! Error cought while starting message pump: " & ex.ToString(), Types.LogEventLevel.Exception)
+            Console.ReadLine()
             Environment.Exit(1)
         End Try
-        Console.WriteLine("==> Starting timeworker daemon...")
+        Logging.WriteConsole("==> Starting timeworker daemon...")
         Try
             Variables.timeWorker = New Threading.Thread(AddressOf Variables.TimeWorker_Run)
             Variables.timeWorker.Start()
-            Console.WriteLine("==> Started. There'll be a response from TW now.")
+            Logging.WriteConsole("==> Started. There'll be a response from TW now.")
         Catch ex As Exception
-            Console.WriteLine("! Error cought while starting timeworker daemon: " & ex.ToString())
+            Logging.WriteConsole("! Error cought while starting timeworker daemon: " & ex.ToString(), Types.LogEventLevel.Exception)
+            Console.ReadLine()
             Environment.Exit(1)
         End Try
         startupTimer.Stop()
-        Console.WriteLine("==> OK! It took " & startupTimer.ElapsedMilliseconds & "ms to start.")
-        Console.WriteLine("==> Now listening commands.")
+        Logging.WriteConsole("==> OK! It took " & startupTimer.ElapsedMilliseconds & "ms to start.")
+        Logging.WriteConsole("==> Now listening commands.")
 GetCmd:
         Dim commands As String = Console.ReadLine()
+
         If commands.ToLower = "exit" Then
             Environment.Exit(0)
         End If
         If commands.ToLower = "addchannel" Then
             Try
-                Console.WriteLine("==> Specify the channel ID: ")
+                Logging.WriteConsole("==> Specify the channel ID: ")
                 Dim id As Long = Console.ReadLine
-                Console.WriteLine("==> Saving...")
+                Logging.WriteConsole("==> Saving...")
                 Dim obj As New Types.MemberChannelModel With {.HasPausedMessageForwarding = False, .KruinBriefingID = Variables.currentSettings.CurrentUID + 1, .MessagesBroadcasted = 0, .TelegramID = id}
                 Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(obj)
                 Dim writer As New IO.StreamWriter(IO.File.Create(IO.Path.Combine(Variables.AppConfDir_Channels, Variables.currentSettings.CurrentUID + 1 & ".json")), System.Text.Encoding.UTF8)
@@ -67,65 +73,86 @@ GetCmd:
                 writer.Dispose()
                 Variables.currentSettings.CurrentUID += 1
                 Methods.SaveSettings()
-                Console.WriteLine("==> OK!")
+                Logging.WriteConsole("==> OK!")
             Catch ex As Exception
-                Console.WriteLine("==> Error: " & ex.ToString)
+                Logging.WriteConsole("==> Error: " & ex.ToString, Types.LogEventLevel.Exception)
             End Try
             GoTo GetCmd
         End If
         If commands.ToLower = "reload" Then
-            Console.WriteLine("==> Initializing...")
+            Logging.WriteConsole("==> Initializing...")
             Methods.Initialize()
-            Console.WriteLine("==> Done!")
+            Logging.WriteConsole("==> Done!")
             GoTo GetCmd
         End If
         If commands.ToLower = "save" Then
-            Console.WriteLine("==> Saving...")
+            Logging.WriteConsole("==> Saving...")
             Methods.SaveSettings()
-            Console.WriteLine("==> Done!")
+            Logging.WriteConsole("==> Done!")
             GoTo GetCmd
         End If
         If commands.ToLower = "ping" Then
-            Console.WriteLine("==> Sending....")
+            Logging.WriteConsole("==> Sending....")
             Try
 #Disable Warning
                 Variables.BotInstance.SendTextMessageAsync(New Telegram.Bot.Types.ChatId(Variables.currentSettings.SupervisorID), "Hello, it's me.")
 #Enable Warning
                 Variables.currentStatistics.MessageSent += 1
-                Console.WriteLine("==> Sent!")
+                Logging.WriteConsole("==> Sent!")
             Catch ex As Exception
-                Console.WriteLine("==> E: " & ex.ToString)
+                Logging.WriteConsole(ex.ToString, Types.LogEventLevel.Exception)
             End Try
             GoTo GetCmd
         End If
         If commands.ToLower = "help" Then
-            Console.WriteLine("==== HELP ====")
-            Console.WriteLine("Help - Display this message.")
-            Console.WriteLine("Exit - Stops KruinBriefingBot.")
-            Console.WriteLine("AddChannel - Add a channel to KruinBriefing project.")
-            Console.WriteLine("Reload - Reload settings and stats.")
-            Console.WriteLine("Save - Save configurations.")
-            Console.WriteLine("Ping - Send a test message to the supervisor.")
-            Console.WriteLine("Stats - Show statistics.")
+            Logging.WriteConsole("==== HELP ====")
+            Logging.WriteConsole("AddChannel - Add a channel to KruinBriefing project.")
+            Logging.WriteConsole("Clear - Clear screen.")
+            Logging.WriteConsole("Cls - Clear screen with a message.")
+            Logging.WriteConsole("Color - Test colored output.")
+            Logging.WriteConsole("Exit - Stops KruinBriefingBot.")
+            Logging.WriteConsole("Help - Display this message.")
+            Logging.WriteConsole("Ping - Send a test message to the supervisor.")
+            Logging.WriteConsole("Reload - Reload settings and stats.")
+            Logging.WriteConsole("Save - Save configurations.")
+            Logging.WriteConsole("Stats - Show statistics.")
+
             GoTo GetCmd
         End If
         If commands.ToLower = "stats" Then
-            Console.WriteLine("==== STATISTICS ====")
-            Console.WriteLine("As of " & Date.UtcNow.ToString & " (UTC): ")
-            Console.WriteLine("Messages sent: " & Variables.currentStatistics.MessageSent)
-            Console.WriteLine("Errors occurred: " & Variables.currentStatistics.ErrorsOccurred)
-            Console.WriteLine("Total received channel posts: " & Variables.currentStatistics.TotalReceivedViaChannels)
-            Console.WriteLine("Total forwarded channel posts: " & Variables.currentStatistics.MessagesForwarded)
-            Console.WriteLine("Total received user commands: " & Variables.currentStatistics.TotalReceivedUserCommands)
+            Logging.WriteConsole("==== STATISTICS ====")
+            Logging.WriteConsole("As of " & Date.UtcNow.ToString & " (UTC): ")
+            Logging.WriteConsole("Messages sent: " & Variables.currentStatistics.MessageSent)
+            Logging.WriteConsole("Errors occurred: " & Variables.currentStatistics.ErrorsOccurred)
+            Logging.WriteConsole("Total received channel posts: " & Variables.currentStatistics.TotalReceivedViaChannels)
+            Logging.WriteConsole("Total forwarded channel posts: " & Variables.currentStatistics.MessagesForwarded)
+            Logging.WriteConsole("Total received user commands: " & Variables.currentStatistics.TotalReceivedUserCommands)
             GoTo GetCmd
         End If
-        Console.WriteLine("==> Invalid command.")
+        If commands.ToLower = "color" Then
+            Dim txt As String = "The quick brown fox jumps over the lazy dog."
+            Logging.WriteConsole("==> Begin of color test.")
+            Logging.WriteConsole(txt, Types.LogEventLevel.Info)
+            Logging.WriteConsole(txt, Types.LogEventLevel.Warning)
+            Logging.WriteConsole(txt, Types.LogEventLevel.Exception)
+            Logging.WriteConsole(txt, -1)
+            Logging.WriteConsole("==> End of color test.")
+            GoTo GetCmd
+        End If
+        If commands.ToLower = "cls" Or commands.ToLower = "clear" Then
+            Console.Clear()
+            If commands.ToLower = "cls" Then
+                Logging.WriteConsole("Console has been cleared.")
+            End If
+            GoTo GetCmd
+        End If
+        Logging.WriteConsole("==> Invalid command.", Types.LogEventLevel.Warning)
         GoTo GetCmd
     End Sub
 
     Sub OnApplicationExit(Of AssemblyLoadContext)(obj As AssemblyLoadContext)
-        Console.WriteLine("==> Closing logger...")
+        Logging.WriteConsole("==> Closing logger...")
         Variables.LogWriter.Close()
-        Console.WriteLine("==> Goodbye.")
+        Logging.WriteConsole("==> Goodbye.")
     End Sub
 End Module

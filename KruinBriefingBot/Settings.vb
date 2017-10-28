@@ -33,7 +33,7 @@ Public NotInheritable Class Methods
         End If
         If Not IO.File.Exists(Variables.AppConfFile_Conf) Then
             Variables.currentSettings = New Settings With {.CurrentSID = 0, .CurrentUID = 0, .IsDebuggingMode = False, .TWInterval = 60000, .APIKey = "", .SupervisorID = 0, .ChannelID = 0}
-            Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentSettings)
+            Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentSettings, Newtonsoft.Json.Formatting.Indented)
             Dim writer As New IO.StreamWriter(IO.File.Create(Variables.AppConfFile_Conf), System.Text.Encoding.UTF8)
             writer.Write(text)
             writer.Flush()
@@ -41,7 +41,7 @@ Public NotInheritable Class Methods
         End If
         If Not IO.File.Exists(Variables.AppConfFile_Stats) Then
             Variables.currentStatistics = New Statistics With {.ErrorsOccurred = 0, .MessageSent = 0, .MessagesForwarded = 0, .TotalReceivedUserCommands = 0, .TotalReceivedViaChannels = 0}
-            Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics)
+            Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics, Newtonsoft.Json.Formatting.Indented)
             Dim writer As New IO.StreamWriter(IO.File.Create(Variables.AppConfFile_Stats), System.Text.Encoding.UTF8)
             writer.Write(text)
             writer.Flush()
@@ -58,12 +58,12 @@ Public NotInheritable Class Methods
     End Sub
 
     Public Shared Sub SaveSettings()
-        Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics)
+        Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics, Newtonsoft.Json.Formatting.Indented)
         Dim writer As New IO.StreamWriter(IO.File.Create(Variables.AppConfFile_Stats), System.Text.Encoding.UTF8)
         writer.Write(text)
         writer.Flush()
         writer.Dispose()
-        Dim stext As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentSettings)
+        Dim stext As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentSettings, Newtonsoft.Json.Formatting.Indented)
         Dim swriter As New IO.StreamWriter(IO.File.Create(Variables.AppConfFile_Conf), System.Text.Encoding.UTF8)
         swriter.Write(stext)
         swriter.Flush()
@@ -71,7 +71,7 @@ Public NotInheritable Class Methods
     End Sub
 
     Public Shared Sub SaveStatsOnly()
-        Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics)
+        Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentStatistics, Newtonsoft.Json.Formatting.Indented)
         Dim writer As New IO.StreamWriter(IO.File.Create(Variables.AppConfFile_Stats), System.Text.Encoding.UTF8)
         writer.Write(text)
         writer.Flush()
