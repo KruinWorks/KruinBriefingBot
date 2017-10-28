@@ -2,6 +2,9 @@
 The source code of KruinBriefingBot.
 
 ## How To Join
+
+**Before joining the KruinBriefing project, please ensure that you've read our [Terms of Service](https://github.com/KruinWorks/KruinBriefingBot/blob/master/ToS.md) carefully.**
+
 1. Add [@KruinBriefingBot](https://t.me/KruinBriefingBot) to your channel.
 
 > If you already have your channel ID, you can directly skip to step 4.
