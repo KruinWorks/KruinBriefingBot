@@ -28,9 +28,9 @@ Public NotInheritable Class Methods
         If Not IO.Directory.Exists(Variables.AppConfDir_Logs) Then
             IO.Directory.CreateDirectory(Variables.AppConfDir_Logs)
         End If
-        If Not IO.Directory.Exists(Variables.AppConfDir_Subscriptions) Then
-            IO.Directory.CreateDirectory(Variables.AppConfDir_Subscriptions)
-        End If
+        'If Not IO.Directory.Exists(Variables.AppConfDir_Subscriptions) Then
+        '    IO.Directory.CreateDirectory(Variables.AppConfDir_Subscriptions)
+        'End If
         If Not IO.File.Exists(Variables.AppConfFile_Conf) Then
             Variables.currentSettings = New Settings With {.CurrentSID = 0, .CurrentUID = 0, .IsDebuggingMode = False, .TWInterval = 60000, .APIKey = "", .SupervisorID = 0, .ChannelID = 0}
             Dim text As String = Newtonsoft.Json.JsonConvert.SerializeObject(Variables.currentSettings, Newtonsoft.Json.Formatting.Indented)
@@ -86,6 +86,24 @@ Public NotInheritable Class Methods
                 Dim channel As Types.MemberChannelModel = Newtonsoft.Json.JsonConvert.DeserializeObject(Of Types.MemberChannelModel)(IO.File.ReadAllText(f.FullName))
                 If channel.TelegramID = channelId Then
                     Return True
+                End If
+            Next
+            Return False
+        Else
+            Return False
+        End If
+    End Function
+
+    Public Shared Async Function CheckIfPaused(channelId As Long) As Task(Of Boolean)
+        Dim chat As Telegram.Bot.Types.Chat = Await Variables.BotInstance.GetChatAsync(channelId)
+        If chat.Type = Telegram.Bot.Types.Enums.ChatType.Channel Then
+            Dim fList() As IO.FileInfo = (New IO.DirectoryInfo(Variables.AppConfDir_Channels)).GetFiles
+            For Each f In fList
+                Dim channel As Types.MemberChannelModel = Newtonsoft.Json.JsonConvert.DeserializeObject(Of Types.MemberChannelModel)(IO.File.ReadAllText(f.FullName))
+                If channel.TelegramID = channelId Then
+                    If channel.HasPausedMessageForwarding Then
+                        Return True
+                    End If
                 End If
             Next
             Return False

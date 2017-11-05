@@ -6,7 +6,7 @@ Public NotInheritable Class Variables
     Public Shared ReadOnly Property AppPath As String = AppContext.BaseDirectory
     Public Shared ReadOnly Property AppConfDir_Base As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing")
     Public Shared ReadOnly Property AppConfDir_Channels As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "channels")
-    Public Shared ReadOnly Property AppConfDir_Subscriptions As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "subscriptions")
+    'Public Shared ReadOnly Property AppConfDir_Subscriptions As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "subscriptions")
     Public Shared ReadOnly Property AppConfDir_Logs As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "logs")
     Public Shared ReadOnly Property AppConfFile_Stats As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "stats.json")
     Public Shared ReadOnly Property AppConfFile_Conf As String = IO.Path.Combine(AppContext.BaseDirectory, "KruinBriefing", "config.json")
@@ -70,6 +70,10 @@ Public NotInheritable Class Variables
             Variables.currentStatistics.TotalReceivedViaChannels += 1
             If Await Methods.CheckIfInSubs(e.Update.ChannelPost.Chat.Id) Then
                 Dim mainChannel As Telegram.Bot.Types.Chat = Await BotInstance.GetChatAsync(New Telegram.Bot.Types.ChatId(currentSettings.ChannelID))
+                If Await Methods.CheckIfPaused(e.Update.ChannelPost.Chat.Id) Then
+                    Logging.WriteBoth("Paused, ignoring.")
+                    Exit Sub
+                End If
                 Logging.WriteBoth("Forwarding...")
                 Try
                     Await BotInstance.ForwardMessageAsync(mainChannel.Id, e.Update.ChannelPost.Chat.Id, e.Update.ChannelPost.MessageId)
@@ -82,7 +86,7 @@ Public NotInheritable Class Variables
                 Variables.currentStatistics.MessagesForwarded += 1
                 Logging.WriteBoth("Succeeded.")
             End If
-        ElseIf e.Update.Type = Telegram.Bot.Types.Enums.UpdateType.MessageUpdate Then
+            ElseIf e.Update.Type = Telegram.Bot.Types.Enums.UpdateType.MessageUpdate Then
             Logging.WriteBoth("[P] Update: via " & e.Update.Message.Chat.Id)
             Logging.WriteLog("PMsg: " & e.Update.Message.Text)
             Variables.currentStatistics.TotalReceivedUserCommands += 1

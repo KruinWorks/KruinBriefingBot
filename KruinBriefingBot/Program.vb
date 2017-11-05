@@ -73,10 +73,59 @@ GetCmd:
                 writer.Dispose()
                 Variables.currentSettings.CurrentUID += 1
                 Methods.SaveSettings()
+                Logging.WriteConsole("==> Reloading...")
+                Methods.Initialize()
                 Logging.WriteConsole("==> OK!")
             Catch ex As Exception
                 Logging.WriteConsole("==> Error: " & ex.ToString, Types.LogEventLevel.Exception)
             End Try
+            GoTo GetCmd
+        End If
+        If commands.ToLower = "rmchannel" Then
+            Try
+                Logging.WriteConsole("==> Specify the channel's KruinBriefing UID: ")
+                Dim id As Long = Console.ReadLine
+                Logging.WriteConsole("==> Removing...")
+                IO.File.Delete(IO.Path.Combine(Variables.AppConfDir_Channels, id & ".json"))
+                Logging.WriteConsole("==> Reloading...")
+                Methods.Initialize()
+                Logging.WriteConsole("==> OK!")
+            Catch ex As Exception
+                Logging.WriteConsole("==> Error: " & ex.ToString, Types.LogEventLevel.Exception)
+            End Try
+            GoTo GetCmd
+        End If
+        If commands.ToLower = "listsubs" Then
+            Try
+                Dim fList() As IO.FileInfo = (New IO.DirectoryInfo(Variables.AppConfDir_Channels)).GetFiles
+                Logging.WriteConsole("Joined channels:")
+                For Each f In fList
+                    Dim channel As Types.MemberChannelModel = Newtonsoft.Json.JsonConvert.DeserializeObject(Of Types.MemberChannelModel)(IO.File.ReadAllText(f.FullName))
+                    Logging.WriteConsole("Telegram ID: " & channel.TelegramID)
+                    Logging.WriteConsole("KruinBriefing ID: " & channel.KruinBriefingID)
+                Next
+            Catch ex As Exception
+                Logging.WriteConsole("==> Error: " & ex.ToString, Types.LogEventLevel.Exception)
+            End Try
+            GoTo GetCmd
+        End If
+        If commands.ToLower = "status" Then
+            Dim status As String = ""
+            Dim memobj As Process = Process.GetCurrentProcess
+            Logging.WriteConsole("Bot Status: ")
+            Logging.WriteConsole("Device: " & Environment.MachineName)
+            Logging.WriteConsole("OS: " & Runtime.InteropServices.RuntimeInformation.OSDescription)
+            Logging.WriteConsole("Uptime: " & New TimeSpan(0, 0, 0, 0, Environment.TickCount).ToString())
+            Logging.WriteConsole("Process Memory Usage: " & Math.Round(memobj.WorkingSet64 / 1024 / 1024, 4) & "MiB.")
+            Logging.WriteConsole("Time(UTC): " & Date.UtcNow.ToString())
+            GoTo GetCmd
+        End If
+        If commands.ToLower = "sendmsg" Then
+            Logging.WriteConsole("==> Feel free to say something: ")
+            Dim txt As String = Console.ReadLine()
+            Logging.WriteConsole("==> Sending....")
+            Variables.BotInstance.SendTextMessageAsync(New Telegram.Bot.Types.ChatId(Variables.currentSettings.SupervisorID), txt)
+            Logging.WriteConsole("==> Sent!")
             GoTo GetCmd
         End If
         If commands.ToLower = "reload" Then
@@ -112,10 +161,14 @@ GetCmd:
             Logging.WriteConsole("Color - Test colored output.")
             Logging.WriteConsole("Exit - Stops KruinBriefingBot.")
             Logging.WriteConsole("Help - Display this message.")
+            Logging.WriteConsole("ListSubs - Display all joined channels.")
             Logging.WriteConsole("Ping - Send a test message to the supervisor.")
             Logging.WriteConsole("Reload - Reload settings and stats.")
+            Logging.WriteConsole("RMChannel - Remove a channel from KruinBriefing project.")
             Logging.WriteConsole("Save - Save configurations.")
+            Logging.WriteConsole("SendMsg - Send a message to the supervisor.")
             Logging.WriteConsole("Stats - Show statistics.")
+            Logging.WriteConsole("Status - Show bot status.")
 
             GoTo GetCmd
         End If
